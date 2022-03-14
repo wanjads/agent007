@@ -1,6 +1,7 @@
 
 """The base simple agent use to train agents.
 This agent is also the benchmark for other agents.
+This agent improves the base simple agent by adding a communication, better action pruning and some minor adjustments
 """
 
 from collections import defaultdict
@@ -26,7 +27,7 @@ class Agent007(BaseAgent):
         # don't keep visiting the same places.
         self._recently_visited_positions = []
         self._recently_visited_length = 6
-        self.attack_distance = 6
+        self.attack_distance = 6  # this was optimized
         self.powerup_distance = 2
         # Keep track of the previous direction to help with the enemy standoffs.
         self._prev_direction = None
@@ -34,7 +35,7 @@ class Agent007(BaseAgent):
         self.old_message = [0, 0]
         self.ongoing_attack = False
         self.steps_without_contact = 0
-        self.game_with_attack = False
+        self.game_with_attack = False  # this is for documenting if there was an attack triggered in the current game
         self.one_on_one_steps = 0
         self.one_on_one = False
 
@@ -79,7 +80,7 @@ class Agent007(BaseAgent):
             constants.Action.Right, constants.Action.Up, constants.Action.Down
         ]
 
-        # action pruning
+        # NEW action pruning
         valid_directions = action_prune.get_filtered_actions(obs)
         if len(valid_directions) == 0:
             valid_directions.append(Action.Stop.value)
@@ -90,6 +91,7 @@ class Agent007(BaseAgent):
 
         if not self.ongoing_attack:
 
+            # The one on one part is currently unused
             if self.one_on_one:
                 self.check_one_on_one(obs)
                 if self.one_on_one_steps > 3:
@@ -141,6 +143,7 @@ class Agent007(BaseAgent):
                 if direction is not None and direction in directions:
                     return [direction.value] + message
             # assistant action during attack
+            # in the current situation, both leader and assistant act the same
             elif self.role == 2:
                 if self._is_adjacent_enemy(items, dist, enemies) and self._maybe_bomb(
                         ammo, blast_strength, items, dist, my_position, directions):
@@ -166,6 +169,7 @@ class Agent007(BaseAgent):
         self._recently_visited_positions = self._recently_visited_positions[
             -self._recently_visited_length:]
 
+        # this is adjusted to choose a direction with specified probabilities, see below
         return [np.random.choice(directions, p=probabilities).value] + message
 
     @staticmethod

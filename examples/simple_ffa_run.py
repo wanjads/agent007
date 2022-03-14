@@ -7,10 +7,11 @@ import random
 
 
 def main():
-    '''Simple function to bootstrap a game.
-       
-       Use this as an example to set up your training env.
-    '''
+
+    """
+    The main difference compared to the standard playground is the usage of agent007,
+    which can be found in the 'agents' folder
+    """
 
     # Create a set of agents (exactly four)
     agent_list = [
